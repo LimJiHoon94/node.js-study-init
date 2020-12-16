@@ -5,18 +5,42 @@ var url = require('url');
 var app = http.createServer(function(request,response){
     var _url = request.url;
     var queryData = url.parse(_url, true).query; 
-    var title = queryData.id;
+    var pathname = url.parse(_url , true).pathname; 
+   
     //console.log(_url);
-    console.log(queryData.id);
-    if(_url == '/'){
-      title = 'Welcome';
-    }
-    if(_url == '/favicon.ico'){
-      return response.writeHead(404);
-    }
-    response.writeHead(200);
+    //console.log(queryData.id);
+    if(pathname === '/'){
+      if(queryData.id === undefined){
+        
+        fs.readFile(`data/${queryData.id}`,'utf8', function(err,description){
+          var title = 'Welcome';
+          var description = 'Hello, Node.js';
+          var template = `
+            <!doctype html>
+            <html>
+            <head>
+              <title>WEB1 - ${title}</title>
+              <meta charset="utf-8">
+            </head>
+            <body>
+              <h1><a href="/">WEB</a></h1>
+              <ul>
+                <li><a href="/?id=html">HTML</a></li>
+                <li><a href="/?id=css">CSS</a></li>
+                <li><a href="/?id=javascript">JavaScript</a></li>
+              </ul>
+              <h2>${title}</h2>
+              <p>${description}
+              </p>
+            </body>
+            </html>
+      `;
+      response.writeHead(200);
+      response.end(template);
+        });
+      }else{
     fs.readFile(`data/${queryData.id}`,'utf8', function(err,description){
-        //var description = data;
+        var title = queryData.id;
         var template = `
           <!doctype html>
           <html>
@@ -37,9 +61,14 @@ var app = http.createServer(function(request,response){
           </body>
           </html>
     `;
+    response.writeHead(200);
     response.end(template);
     });
-    //console.log(__dirname+ _url);
+  }
+  }else {
+    response.writeHead(404);
+    response.end('Not found');
+  }
     
    
     //response.end에 사용자에게 전송할 데이터를 입력한다.
